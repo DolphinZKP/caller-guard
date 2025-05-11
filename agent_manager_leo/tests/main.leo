@@ -1,5 +1,5 @@
-program test_callerguard.aleo {
-    import callerguard;
+program main.aleo {
+    import main;
 
     function test_mint_grant_revoke_cycle() {
         // Precompute a salted commit and a permission hash
