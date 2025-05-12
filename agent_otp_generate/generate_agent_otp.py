@@ -1,3 +1,6 @@
+from utils.blockchain import blockchain_call
+import time
+
 # When generating OTP
 def generate_agent_otp(rep_id, bank_name):
     # 1. Get current timestamp
@@ -7,7 +10,7 @@ def generate_agent_otp(rep_id, bank_name):
     seed = get_secure_seed(rep_id, bank_name)
     
     # 3. Generate OTP
-    otp = blockchain.call(
+    otp = blockchain_call(
         "agent_otp_generate.aleo",
         "generate_otp",
         [rep_id, bank_name, generation_timestamp, seed]
