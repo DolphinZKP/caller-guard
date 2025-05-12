@@ -2,28 +2,22 @@ program agent_manager.aleo {
   // Agent record for call center employees
   record Agent {
     owner: address,         // HR admin address who created this record
-    rep_id: field,          // Agent's representative ID
-    bank_name: field,       // Bank/institution name  
-    status: u8,             // 1 = active, 0 = revoked
-    private permissions: field,  // Raw permission string/value
-    private seed: field     // Secret seed for OTP generation
+    private rep_id: field,  // Made private to protect agent identity
+    private bank_name: field, // Made private to protect institutional association
+    status: u8              // Public to allow verification of active status
   }
 
-  // Mint a new agent record
+  // Mint a new agent record (removed unused permissions parameter)
   transition mint_agent(
     private rep_id: field,
-    private bank_name: field,
-    private permissions: field,
-    private seed: field
+    private bank_name: field
   ) -> Agent {
     // Return the agent record
     return Agent {
       owner: self.caller,
       rep_id: rep_id,
       bank_name: bank_name,
-      status: 1u8,
-      permissions: permissions,
-      seed: seed
+      status: 1u8
     };
   }
 
@@ -37,18 +31,12 @@ program agent_manager.aleo {
       owner: agent.owner,
       rep_id: agent.rep_id,
       bank_name: agent.bank_name,
-      status: 0u8,
-      permissions: agent.permissions,
-      seed: agent.seed
+      status: 0u8
     };
   }
 
-  // Check if an agent has a specific permission
-  transition has_permission(agent: Agent, permission: field) -> bool {
-    // Verify the agent is active
-    assert_eq(agent.status, 1u8);
-    
-    // Direct comparison with the permission field
-    return agent.permissions == permission;
+  // Added: Check if an agent is active
+  transition is_agent_active(agent: Agent) -> bool {
+    return agent.status == 1u8;
   }
 }
