@@ -1,20 +1,25 @@
-# caller-guard/utils/blockchain.py
 import subprocess
-import json
 import os
 import tempfile
-import time
+import json
+import re
 
-def blockchain_call(program_name, function_name, inputs, project_path=None):
-    """Call an Aleo program function using CLI"""
-    # Format inputs
-    input_args = []
-    for input_val in inputs:
-        if isinstance(input_val, str) and not input_val.endswith("field"):
-            input_args.append(f'"{input_val}"')
-        else:
-            input_args.append(str(input_val))
+def blockchain_call(program_name, function_name, inputs, project_path=None, 
+                   is_deployed=False, network=None, endpoint=None):
+    """
+    Call an Aleo program function using Leo CLI
     
+    Args:
+        program_name: Name of the Aleo program
+        function_name: Function to call
+        inputs: List of input parameters
+        project_path: Path to Leo project
+        is_deployed: Whether to run on deployed program
+        network: Network to use (e.g., "testnet")
+        endpoint: API endpoint for the network
+    """
+    # Always quote arguments for Leo CLI
+    input_args = [f'"{str(arg)}"' for arg in inputs]
     formatted_inputs = " ".join(input_args)
     
     # Create temp file for output
@@ -26,30 +31,45 @@ def blockchain_call(program_name, function_name, inputs, project_path=None):
         project_path = os.getcwd()
     
     # Build command
-    base_cmd = f"cd {project_path} && leo execute {program_name} {function_name} {formatted_inputs} --output {output_file}"
+    if is_deployed or True:  # Always use leo run
+        network_flag = f"--network {network}" if network else ""
+        endpoint_flag = f"--endpoint \"{endpoint}\"" if endpoint else ""
+        base_cmd = f"cd {project_path} && leo run {function_name} {formatted_inputs} {network_flag} {endpoint_flag}"
+    else:
+        base_cmd = f"cd {project_path} && leo execute {program_name} {function_name} {formatted_inputs}"
+    
+    # Use WSL on Windows
     cmd = f"wsl -- bash -c '{base_cmd}'" if os.name == 'nt' else base_cmd
     
-    # Execute
     try:
-        subprocess.run(cmd, shell=True, check=True)
-        
-        # Read output
-        if os.name == 'nt':
-            wsl_path = output_file.replace('\\', '/')
-            if wsl_path[1] == ':':
-                drive = wsl_path[0].lower()
-                wsl_path = f"/mnt/{drive}{wsl_path[2:]}"
-            file_content = subprocess.check_output(f'wsl -- cat "{wsl_path}"', shell=True, text=True)
-        else:
-            with open(output_file, 'r') as f:
-                file_content = f.read()
-        
-        # Parse result
-        return json.loads(file_content) if file_content.strip() else {"success": True}
-    except Exception as e:
+        print(f"Executing: {cmd}")
+        result = subprocess.run(cmd, shell=True, check=True, capture_output=True, text=True)
+        output = result.stdout
+
+        # Try to parse JSON from output, or just return the output
+        try:
+            return json.loads(output)
+        except json.JSONDecodeError:
+            return {"success": True, "raw_output": output.strip()}
+
+    except subprocess.CalledProcessError as e:
+        print(f"Command failed: {e}")
+        print(f"Error output: {e.stderr if hasattr(e, 'stderr') else ''}")
         return {"success": False, "error": str(e)}
     finally:
         try:
             os.unlink(output_file)
         except:
             pass
+
+def extract_leo_output(raw_output):
+    """
+    Extracts the output record (the curly-brace block) from Leo CLI output.
+    Returns the record as a string, or None if not found.
+    """
+    # Find the "Output" section and the first curly-brace block after it
+    match = re.search(r"Output\s*\n\s*•\s*({.*?})", raw_output, re.DOTALL)
+    if match:
+        record_str = match.group(1)
+        return record_str.strip()
+    return None
