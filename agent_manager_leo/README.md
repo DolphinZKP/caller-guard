@@ -35,3 +35,9 @@ leo run mint_agent
 ## Deployment
 
 Once the program is finalized, compiled artifacts can be deployed to the Aleo blockchain.
+
+## Other commands
+
+leo execute mint_agent 424670554677936561047124518824635325114701728861320309810049233899774946975field 3004390782677111859190851561366000981442177319001004250798462378142068field
+
+leo deploy --network testnet --endpoint "https://api.explorer.aleo.org/v1" --path . --dry-run

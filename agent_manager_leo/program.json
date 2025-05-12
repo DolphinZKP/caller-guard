@@ -1,5 +1,5 @@
 {
-  "program": "main.aleo",
+  "program": "agent_manager.aleo",
   "version": "0.1.0",
   "description": "Blockchain scripts for minting and revoking agent information",
   "license": "MIT",

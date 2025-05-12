@@ -1,4 +1,4 @@
-program main.aleo;
+program agent_manager.aleo;
 
 record Agent:
     owner as address.private;
