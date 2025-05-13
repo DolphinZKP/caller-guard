@@ -6,20 +6,13 @@ program agent_otp_generate.aleo {
         timestamp: u64,
         seed: field
     ) -> u32 {
-        // Convert timestamp to field
-        let timestamp_field: field = timestamp as field;
+        // Use a single hash operation with combined inputs
+        let combined: field = rep_id + bank_name + (timestamp as field) + seed;
+        let hash_result: field = BHP256::hash_to_field(combined);
         
-        // Apply multiple hashing rounds for security
-        let hash1: field = BHP256::hash_to_field(rep_id + seed);
-        let hash2: field = BHP256::hash_to_field(bank_name + hash1);
-        let hash3: field = BHP256::hash_to_field(timestamp_field + hash2);
+        // Convert to u32 and limit to 6 digits (0-999999)
+        let otp: u32 = (hash_result as u32) % 1000000u32;
         
-        // Convert hash to u128 for numeric operations
-        let hash_u128: u128 = hash3 as u128;
-        
-        // Extract 6 digits (0-999999) using modulo
-        let six_digits: u32 = (hash_u128 % 1000000u128) as u32;
-        
-        return six_digits;
+        return otp;
     }
 }
