@@ -1,6 +1,7 @@
 import os
 import sys
 import subprocess
+import json
 
 # Add the project root to sys.path
 script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -51,6 +52,41 @@ def generate_agent_otp(rep_id: str, bank_name: str, seed: int, db: sqlite3.Conne
         
     return {"otp": otp, "timestamp": generation_timestamp}
 
+def generate_zk_proof(rep_id, bank_name, seed, timestamp, otp, proof_json_path=None):
+    """
+    Generates a ZK proof using snarkvm execute and saves the output JSON to a file in the output folder.
+    Returns the parsed JSON object.
+    """
+    # Ensure output directory exists
+    output_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "outputs")
+    os.makedirs(output_dir, exist_ok=True)
+    if proof_json_path is None:
+        proof_json_path = os.path.join(output_dir, "proof.json")
+
+    # Prepare the command
+    cmd = [
+        "snarkvm", "execute", "prove_otp_generation",
+        rep_id, bank_name, seed, f"{timestamp}u64", f"{otp}u32"
+    ]
+    # Run the command and capture output
+    result = subprocess.run(cmd, capture_output=True, text=True)
+    output = result.stdout
+
+    # Find the JSON in the output (snarkvm prints it after the result)
+    json_start = output.find('{')
+    json_end = output.rfind('}') + 1
+    if json_start == -1 or json_end == -1:
+        raise Exception("Could not find JSON output in snarkvm response.")
+
+    proof_json = output[json_start:json_end]
+    proof_data = json.loads(proof_json)
+
+    # Save to file
+    with open(proof_json_path, "w") as f:
+        f.write(proof_json)
+
+    print(f"Proof JSON saved to {proof_json_path}")
+    return proof_data
 
 if __name__ == "__main__":
     # Call the function
@@ -72,3 +108,13 @@ if __name__ == "__main__":
     if not verify_result:
         raise Exception("Failed to verify database write")
     print(f"\nDatabase write verified: {verify_result}")
+
+    # Example usage of generate_zk_proof
+    # placeholder variables
+    rep_id = "1233field"
+    bank_name = "5678field"
+    seed = "123field"
+    timestamp = "1747100401"
+    otp = "100401"
+    proof = generate_zk_proof(rep_id, bank_name, seed, timestamp, otp)
+    print(json.dumps(proof, indent=2))

@@ -36,6 +36,7 @@ program agent_otp_generate.aleo {
     }
 
     // ZK-SNARK transition for proving OTP generation
+    // not actual proof by  leo run prove_otp_generation "1233field" "5678field" "123field" "1747100401u64" "100401u32"
     transition prove_otp_generation(
         private rep_id: field,
         private bank_name: field,
