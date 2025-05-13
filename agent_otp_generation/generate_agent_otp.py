@@ -41,6 +41,14 @@ def generate_agent_otp(rep_id: str, bank_name: str, seed: int, db: sqlite3.Conne
         "INSERT INTO otp_sessions (rep_id, bank_name, timestamp, expires_at) VALUES (?, ?, ?, ?)",
         [rep_id, bank_name, generation_timestamp, generation_timestamp + 60]
     )
+    conn.commit()  # Explicitly commit the transaction
+    
+    # Verify the write
+    db.execute("SELECT * FROM otp_sessions WHERE rep_id = ? AND timestamp = ?", [rep_id, generation_timestamp])
+    result = db.fetchone()
+    if not result:
+        raise Exception("Failed to verify database write")
+        
     return {"otp": otp, "timestamp": generation_timestamp}
 
 
@@ -49,3 +57,18 @@ if __name__ == "__main__":
     result = generate_agent_otp("1233", "5678", 123, db)    
     print(f"Generated OTP: {result['otp']}")
     print(f"Timestamp: {result['timestamp']}")
+
+    # Verify the database write using the actual values
+    db.execute("SELECT * FROM otp_sessions")
+    all_records = db.fetchall()
+    print("\nAll records in database:")
+    for record in all_records:
+        print(f"Record: {record}")
+    
+    # Verify with the actual values used in the write
+    db.execute("SELECT * FROM otp_sessions WHERE rep_id = ? AND timestamp = ?", 
+              [to_field("1233"), result['timestamp']])
+    verify_result = db.fetchone()
+    if not verify_result:
+        raise Exception("Failed to verify database write")
+    print(f"\nDatabase write verified: {verify_result}")
