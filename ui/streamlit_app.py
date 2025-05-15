@@ -176,12 +176,12 @@ with col1:
     if st.button("🧑‍💼 HR Admin", key="hr_admin_btn", use_container_width=True):
         st.session_state.current_page = "HR Admin"
         st.rerun()
-with col2:
+with col3:
     agent_dash_active = "active" if st.session_state.current_page == "Agent Dashboard" else ""
     if st.button("👨‍💼 Agent Dashboard", key="agent_dashboard_btn", use_container_width=True):
         st.session_state.current_page = "Agent Dashboard"
         st.rerun()
-with col3:
+with col2:
     agent_mgmt_active = "active" if st.session_state.current_page == "Agent Management" else ""
     if st.button("🔑 Agent Management", key="agent_management_btn", use_container_width=True):
         st.session_state.current_page = "Agent Management"
@@ -755,7 +755,7 @@ elif st.session_state.current_page == "Agent Management":
     st.write("Manage agent identities, revoke access, and view activity logs")
     
     # Add tabs for different views
-    tab1, tab2 = st.tabs(["Enabled Agents", "All Agents"])
+    tab1, tab2 = st.tabs(["Enabled Agents", "All Employees"])
     
     # Get all employees and their blockchain status
     with get_db() as db:
