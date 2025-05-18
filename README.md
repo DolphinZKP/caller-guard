@@ -1,6 +1,45 @@
 # ZK Caller Verification System
 
-A secure identity verification system for call centers using zero-knowledge proofs on the blockchain.
+A secure identity verification system for call centers using zero-knowledge proofs on the blockchain. This system provides a robust solution for verifying call center agent identities while maintaining privacy and preventing identity theft through blockchain-based authentication.
+
+## System Overview
+
+The ZK Caller Verification System implements a secure, decentralized approach to call center agent verification using zero-knowledge proofs. This ensures that:
+
+- Agent identities are securely verified without exposing sensitive information
+- Each verification is cryptographically secure and tamper-proof
+- The system maintains privacy while providing strong authentication
+- Verification can be performed in real-time during calls
+
+## Key Features
+
+- **Blockchain-based Identity Verification**: Secure agent identity verification using zero-knowledge proofs
+- **One-time Verification Codes**: Unique, time-limited codes for secure caller authentication
+- **HR Management Portal**: Streamlined interface for managing agent verification and permissions
+- **Real-time Verification**: Instant verification of agent identity during calls
+- **Privacy-Preserving**: Zero-knowledge proofs ensure sensitive data remains private
+
+## UI Screenshots
+
+### HR Management Interface
+
+![HR Management](hr_management_page.png)
+_Main HR interface for managing agent verification and permissions_
+
+### Badge Minting Interface
+
+![HR Mint Badge](hr_mint_badge_page.png)
+_Interface for minting blockchain identity badges for verified agents_
+
+### Agent Verification Interface
+
+![Call Center Agent Verification](call_center_agent_one_time_cde.png)
+_Agent dashboard for generating and managing one-time verification codes_
+
+### System Deployment
+
+![Proof of Deployment](agent_manager/proof_of_deployment.png)
+_Blockchain deployment verification and system status_
 
 ## Quick Start
 
